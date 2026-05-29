@@ -1,298 +1,246 @@
-# Flick TV — Clean Architecture
+# Flick TV — Architecture
 
-This document defines how the app is structured: layers, dependencies, folders, and conventions. It pairs with [UI_HOME_SCREEN_PLAN.md](./UI_HOME_SCREEN_PLAN.md) for the first feature (home / money onboarding).
-
----
-
-## Goals
-
-- **Testable** — business rules live in domain, not in widgets.
-- **Replaceable** — swap API, local DB, or mocks without touching UI.
-- **Scalable** — new features add folders, not spaghetti in `main.dart`.
-- **Assignment-friendly** — clear boundaries for reviews and incremental delivery.
+Flutter app organized by **feature modules**. Each feature owns **presentation**, **domain**, and **data**. A feature is a product area (e.g. home, wallet, gift card)—not a single screen.
 
 ---
 
-## Layer overview
+## Feature vs screen
+
+| Concept | What it is | Example |
+|---------|------------|---------|
+| **Feature** | Business area + all layers for that area | `features/home/` |
+| **Screen** | One route / full-page view inside a feature | `HomeScreen`, `HomeOnboardingScreen` |
+| **Feature widget** | Reusable UI used on **one or more screens in the same feature** | `FeatureCard`, `MoneyHero` |
+| **Global widget** | Reusable UI **across features** | `AppLoadingIndicator`, primary buttons |
+
+- One feature → **many screens** (1 : N).
+- One screen → **one primary route**, may compose many widgets.
+- Feature widgets **must not** be imported by other features; use global widgets or move shared UI to `core/widgets/`.
+
+---
+
+## Layer overview (per feature)
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │           Presentation              │
-                    │  (UI, State management, routing)   │
-                    └─────────────────┬───────────────────┘
-                                      │ uses
-                    ┌─────────────────▼───────────────────┐
-                    │              Domain                  │
-                    │  Entities, Use cases, Repo contracts │
-                    └─────────────────┬───────────────────┘
-                                      │ implemented by
-                    ┌─────────────────▼───────────────────┐
-                    │               Data                   │
-                    │  Models, Data sources, Repo impl     │
-                    └─────────────────┬───────────────────┘
-                                      │
-                    ┌─────────────────▼───────────────────┐
-                    │               Core                   │
-                    │  DI, errors, theme, utils, network   │
-                    └─────────────────────────────────────┘
+features/<feature_name>/
+├── presentation/     UI: screens, feature widgets, Bloc/Cubit
+├── domain/           Entities + repository contracts (no Flutter)
+└── data/             Models, data sources, repository implementations
 ```
 
-**Dependency rule:** dependencies point **inward only**.
+App-wide code:
 
-- `presentation` → `domain`
-- `data` → `domain`
-- `domain` → nothing feature-specific (only `core` types if shared)
-- `presentation` must **not** import `data` implementations directly
+```
+app/          MaterialApp, router
+core/         theme, errors, DI, network, global widgets
+```
+
+**Dependency rule**
+
+- `presentation` → `domain` (same feature)
+- `data` → `domain` (same feature)
+- `presentation` → `core` (theme, global widgets, DI)
+- `presentation` must **not** import another feature’s `data/` or `presentation/`
+- `domain` has no Flutter, Bloc, or JSON models
+
+**No use case layer.** Bloc calls the feature’s repository contract directly.
 
 ---
 
-## Recommended folder structure
-
-Feature-first layout (one folder per feature, each with its own layers):
+## Folder structure
 
 ```
 lib/
-├── main.dart                          # bootstrap, runApp
+├── main.dart
 ├── app/
-│   ├── flick_app.dart                 # MaterialApp, theme, routes
-│   └── router/
-│       └── app_router.dart            # named routes / go_router (optional)
+│   ├── flick_app.dart
+│   └── router/app_router.dart
 │
 ├── core/
 │   ├── constants/
-│   │   └── app_constants.dart
-│   ├── di/
-│   │   └── injection.dart             # get_it / manual wiring
+│   ├── di/injection.dart
 │   ├── error/
-│   │   ├── failures.dart              # Failure hierarchy
-│   │   └── exceptions.dart
 │   ├── network/
-│   │   └── api_client.dart            # when API exists
 │   ├── theme/
-│   │   ├── app_colors.dart
-│   │   └── app_theme.dart
-│   └── utils/
-│       └── either.dart                # optional Result/Either helper
+│   └── widgets/                    # GLOBAL widgets (all features)
+│       ├── widgets.dart              # barrel export
+│       └── app_loading_indicator.dart
 │
 └── features/
     └── home/
         ├── domain/
         │   ├── entities/
-        │   │   ├── feature_highlight.dart
-        │   │   └── home_content.dart
-        │   ├── repositories/
-        │   │   └── home_repository.dart    # abstract
-        │   └── usecases/
-        │       ├── get_home_content.dart
-        │       └── on_add_money_tapped.dart  # placeholder / analytics hook
-        │
+        │   └── repositories/
         ├── data/
         │   ├── models/
-        │   │   └── home_content_model.dart   # JSON ↔ entity mappers
         │   ├── datasources/
-        │   │   ├── home_remote_data_source.dart
-        │   │   └── home_local_data_source.dart  # optional cache
         │   └── repositories/
-        │       └── home_repository_impl.dart
-        │
         └── presentation/
-            ├── bloc/                       # or cubit/
-            │   ├── home_bloc.dart
-            │   ├── home_event.dart
-            │   └── home_state.dart
-            ├── pages/
-            │   └── home_page.dart
-            └── widgets/
-                ├── money_background.dart
-                ├── money_hero.dart
-                ├── feature_card.dart
-                └── gift_card_tile.dart
+            ├── bloc/                 # feature state (may split per screen later)
+            ├── screens/              # one file per route / screen
+            │   └── home_screen.dart
+            └── widgets/              # FEATURE widgets (reused across home screens)
+                ├── home_widgets.dart # barrel export
+                ├── money_hero.dart   # (add when building UI)
+                └── feature_card.dart
 ```
 
-Future features (e.g. `wallet`, `gift_card`, `settings`) follow the same `domain / data / presentation` pattern under `features/`.
+Future features follow the same shape:
+
+```
+features/wallet/
+  presentation/screens/...
+  presentation/widgets/...
+  domain/...
+  data/...
+```
 
 ---
 
-## Layer responsibilities
+## Presentation layer
 
-### Domain
+### Screens (`presentation/screens/`)
 
-| Piece | Role |
-|-------|------|
-| **Entity** | Pure business objects (`FeatureHighlight`, `HomeContent`) — no Flutter, no JSON |
-| **Repository (abstract)** | Contract: `Future<Either<Failure, HomeContent>> getHomeContent()` |
-| **Use case** | Single action: `GetHomeContent`, `SubmitAddMoney`. Calls one repository method |
+- Full-page views tied to **routes**.
+- Provide `BlocProvider` (or receive bloc from parent).
+- Compose **feature widgets** and **global widgets**; keep layout thin.
+- Naming: `HomeScreen`, `AddMoneyScreen` — suffix `Screen`.
 
-Example entity:
+### Feature widgets (`presentation/widgets/`)
+
+- Stateless (or small stateful) components **owned by this feature**.
+- Take **domain entities** or simple callbacks as parameters.
+- Safe to use on **any screen inside the same feature**.
+- Export via `<feature>_widgets.dart` for clean imports.
 
 ```dart
-class FeatureHighlight {
-  const FeatureHighlight({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.iconAsset,
-  });
-
-  final String id;
-  final String title;
-  final String subtitle;
-  final String iconAsset;
+// features/home/presentation/widgets/feature_card.dart
+class FeatureCard extends StatelessWidget {
+  const FeatureCard({required this.highlight, super.key});
+  final FeatureHighlight highlight;
+  // ...
 }
 ```
 
-### Data
+### Bloc (`presentation/bloc/`)
 
-| Piece | Role |
-|-------|------|
-| **Model** | DTO with `fromJson` / `toEntity()` |
-| **Data source** | Remote API, local JSON asset, or hardcoded mock for assignment |
-| **Repository impl** | Maps exceptions → `Failure`, models → entities |
+- Handles user events and calls **domain repositories**.
+- Can be **one bloc per feature** or **one per screen** when state is unrelated—your choice as the feature grows.
 
-For early development, `HomeLocalDataSource` can return static JSON or a const list — swap to HTTP later without changing domain or UI contracts.
+### Global widgets (`core/widgets/`)
 
-### Presentation
+- Design-system pieces: loaders, buttons, app bars, error views.
+- No feature-specific copy or entities.
+- Export via `core/widgets/widgets.dart`.
 
-| Piece | Role |
-|-------|------|
-| **Page** | `HomePage` — listens to state, builds `Scaffold` / `Stack` |
-| **Widgets** | Dumb UI; receive data via constructor |
-| **Bloc / Cubit** | Maps user events → use cases → emits `HomeState` |
+**When to promote a widget to global**
 
-Presentation **never** parses JSON or calls `http` directly.
+- Used in **two or more features**, or
+- Part of the app design system (buttons, typography wrappers).
 
-### Core
+**When to keep it in the feature**
 
-Shared across features: theme, colors, failure types, DI registration, logging, base API client.
+- Uses feature entities, feature-specific layout, or product copy for that area only.
 
 ---
 
-## State management
+## Domain layer
 
-**Recommendation:** `flutter_bloc` (Cubit for simple home; full Bloc if many events).
+| Piece | Role |
+|-------|------|
+| **Entities** | `HomeContent`, `FeatureHighlight` — pure Dart |
+| **Repository (abstract)** | `HomeRepository` — what this feature needs from data |
 
-| State | Meaning |
-|-------|---------|
-| `HomeInitial` | Before first load |
-| `HomeLoading` | Fetching content (optional; can skip for local mock) |
-| `HomeLoaded` | `HomeContent` + animation phase flags |
-| `HomeError` | `Failure` message for retry UI |
-
-| Event / method | Action |
-|----------------|--------|
-| `HomeStarted` | Run `GetHomeContent`, start intro animation |
-| `HomeAddMoneyPressed` | Navigate or show dialog (use case / coordinator) |
-| `HomeGiftCardPressed` | Navigate to gift flow |
-| `HomeAnimationCompleted` | Set flag so stagger logic does not repeat |
-
-Alternative: **Riverpod** with `AsyncNotifier` — same layering; only presentation wiring changes.
+Throws `FailureException` on failure (see below).
 
 ---
 
-## Data flow (home feature)
+## Data layer
+
+| Piece | Role |
+|-------|------|
+| **Model** | JSON / API DTO + `toEntity()` |
+| **Data source** | Local cache + remote (mock or HTTP) |
+| **Repository impl** | Implements domain contract; picks source via `AppDataConfig` |
+
+### Mock API (no backend yet)
+
+| File | Role |
+|------|------|
+| `HomeContentMockData` | Shared JSON for mock responses |
+| `MockApiClient` | `GET /api/v1/home`, `POST` add-money / gift-card with ~700ms delay |
+| `HttpApiClient` | Stub for a future real base URL |
+| `AppDataConfig` | `HomeDataSourceMode.remoteMock` (default) or `.local` |
+
+Repository falls back to `HomeLocalDataSource` if mock remote fails and `fallbackToLocalOnRemoteError` is true.
+
+---
+
+## Routing
+
+`app/router/app_router.dart` maps **route name → Screen widget**.
+
+Multiple routes can point to screens in the **same feature**:
+
+```dart
+case AppRoutes.home:
+  return MaterialPageRoute(builder: (_) => const HomeScreen());
+case AppRoutes.homeAddMoney:
+  return MaterialPageRoute(builder: (_) => const AddMoneyScreen());
+```
+
+Both live under `features/home/presentation/screens/`.
+
+---
+
+## Data flow
 
 ```
-User opens app
-      │
-      ▼
-HomePage dispatches HomeStarted
-      │
-      ▼
-HomeBloc ──► GetHomeContent (use case)
-      │
-      ▼
-HomeRepository (interface)
-      │
-      ▼
-HomeRepositoryImpl ──► HomeLocalDataSource / Remote
-      │
-      ▼
-HomeContentModel.toEntity() → HomeContent
-      │
-      ▼
-HomeBloc emits HomeLoaded
-      │
-      ▼
-HomePage builds widgets + drives AnimationController
-```
-
-User taps **Add Money**:
-
-```
-HomeAddMoneyPressed → OnAddMoneyTapped (use case)
-      → repository / analytics / navigation callback
+HomeScreen
+  → HomeBloc (presentation)
+    → HomeRepository (domain)
+      → HomeRepositoryImpl (data)
+        → data sources → models → entities
+  → HomeBloc emits state
+  → Screen rebuilds using feature + global widgets
 ```
 
 ---
 
 ## Dependency injection
 
-Use **get_it** (or manual `main()` wiring for minimal scope).
+`core/di/injection.dart` — register by feature:
 
-Registration order in `core/di/injection.dart`:
-
-1. Core services (`ApiClient`)
-2. Data sources
-3. Repository implementations (bind to abstract interfaces)
-4. Use cases
-5. Blocs / Cubits (factory — new instance per route if needed)
-
-```dart
-// Illustrative
-getIt.registerLazySingleton<HomeRepository>(
-  () => HomeRepositoryImpl(local: getIt()),
-);
-getIt.registerFactory(() => GetHomeContent(getIt()));
-getIt.registerFactory(() => HomeBloc(getHomeContent: getIt()));
-```
+1. Data sources  
+2. Repository (`HomeRepository` → `HomeRepositoryImpl`)  
+3. Blocs (factory per screen or feature)
 
 ---
 
 ## Error handling
 
-```dart
-// core/error/failures.dart
-sealed class Failure {
-  const Failure(this.message);
-  final String message;
-}
-
-class ServerFailure extends Failure { ... }
-class CacheFailure extends Failure { ... }
-```
-
-Repository catches `Exception`, returns `Left(Failure)` or throws mapped failure. Bloc exposes user-facing message in `HomeError`.
+- Data: `ServerException`, `CacheException`
+- Repository: `throw FailureException(failure)`
+- Bloc: `catch (FailureException e)` → error state on screen
 
 ---
 
-## Routing (when app grows)
+## Adding a new feature (checklist)
 
-| Approach | When |
-|----------|------|
-| Named `Navigator` routes | 2–3 screens (assignment) |
-| `go_router` | Deep links, nested nav |
-
-Keep route **names** in `app/router/`; pages stay in `features/*/presentation/pages/`.
+1. Create `features/<name>/domain|data|presentation`.
+2. Add `presentation/screens/` and `presentation/widgets/`.
+3. Register repository + bloc in `injection.dart`.
+4. Add routes in `app_router.dart`.
+5. Only add to `core/widgets/` if UI is truly cross-feature.
 
 ---
 
-## Testing strategy
+## Adding a new screen (existing feature)
 
-| Layer | What to test |
-|-------|----------------|
-| Domain | Use cases with mocked repository |
-| Data | Repository impl + model parsing (golden JSON fixtures) |
-| Presentation | Bloc tests with `bloc_test`; widget tests for `FeatureCard` |
-| Integration | Optional: pump `HomePage` with mocked bloc |
-
-```
-test/
-  features/
-    home/
-      domain/get_home_content_test.dart
-      data/home_repository_impl_test.dart
-      presentation/home_bloc_test.dart
-```
+1. Add `presentation/screens/<name>_screen.dart`.
+2. Reuse widgets from `presentation/widgets/`.
+3. Reuse or add bloc events/states; split bloc if state is unrelated.
+4. Register route in `app_router.dart`.
 
 ---
 
@@ -300,37 +248,24 @@ test/
 
 | Phase | Deliverable |
 |-------|-------------|
-| **0** | `core/theme`, `app/flick_app.dart`, strip demo counter from `main.dart` |
-| **1** | `home` domain entities + `GetHomeContent` + mock repository |
-| **2** | `HomePage` static UI per [UI_HOME_SCREEN_PLAN.md](./UI_HOME_SCREEN_PLAN.md) |
-| **3** | `HomeBloc` + wire list of features from use case |
-| **4** | Intro animation in presentation only |
-| **5** | Remote API + real repository (if assignment requires backend) |
-| **6** | Additional features (`gift_card`, `add_money`) as new feature modules |
+| **0** | Core + app shell + home domain/data |
+| **1** | Home feature widgets + full `HomeScreen` UI + intro animation |
+| **2** | Add Money + Gift Card screens + navigation — done |
+| **3** | SVG assets via `flutter_svg` — done |
+| **4** | Mock remote API (`MockApiClient`) — done |
+| **5** | Real `HttpApiClient` when backend URL is available |
+| **6** | New feature modules (`wallet`, etc.) |
 
 ---
 
 ## Conventions
 
-- **Naming:** `snake_case` files; `PascalCase` types; suffixes `Page`, `Bloc`, `Repository`, `Model`, `Entity`.
-- **Imports:** package imports only (`package:flick_tv/...`); avoid deep relative `../../../`.
-- **Widgets:** Prefer `const` constructors where possible; pass `FeatureHighlight` into `FeatureCard`, not raw strings from bloc in many places.
-- **Animation:** Keep `AnimationController` in `HomePage` or a dedicated `HomeIntroAnimator` widget — not in domain or data.
-
----
-
-## Open decisions (fill in as you build)
-
-| Decision | Options | Notes |
-|----------|---------|-------|
-| State management | Bloc vs Riverpod | Bloc assumed above |
-| API | REST vs mock JSON asset | Start mock/local |
-| Navigation | Navigator vs go_router | Navigator OK for v1 |
-| DI | get_it vs manual | get_it scales better |
+- **Imports:** `package:flick_tv/...` only.
+- **Files:** `snake_case`; types: `PascalCase`; suffixes `Screen`, `Bloc`, `Repository`.
+- **Animation:** `AnimationController` only in screens or feature widgets—not in domain/data.
 
 ---
 
 ## Related docs
 
-- [UI_HOME_SCREEN_PLAN.md](./UI_HOME_SCREEN_PLAN.md) — visual spec, widgets, animation timeline
-- [README.md](../README.md) — project setup and links to these docs
+- [README.md](../README.md)

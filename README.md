@@ -1,24 +1,32 @@
 # flick_tv
 
-Flick TV assignment
+Flick TV assignment — Flutter app with feature-first clean architecture.
+
+## Run
+
+```bash
+flutter pub get
+flutter run
+```
 
 ## Documentation
 
-| Doc | Description |
-|-----|-------------|
-| [docs/UI_HOME_SCREEN_PLAN.md](docs/UI_HOME_SCREEN_PLAN.md) | Home screen UI spec, animation phases, widgets, and build order |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Clean architecture: layers, folders, state, DI, and implementation phases |
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — layers, folders, Bloc, manual get_it DI, mock API
 
-## Getting Started
+## Mock API (no backend)
 
-This project is a starting point for a Flutter application.
+Data flows through:
 
-A few resources to get you started if this is your first Flutter project:
+1. **`MockApiClient`** — fakes `GET /api/v1/home` with ~700ms delay and JSON from `HomeContentMockData`
+2. **`HomeRemoteDataSource`** — parses the response like a real API
+3. **`HomeLocalDataSource`** — offline fallback if the mock request fails
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+To use instant local data (no delay), change `AppDataConfig` in `lib/core/di/injection.dart`:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```dart
+const AppDataConfig _dataConfig = AppDataConfig(
+  homeDataSource: HomeDataSourceMode.local,
+);
+```
+
+When a backend exists, register `HttpApiClient` instead of `MockApiClient` in `injection.dart`.
