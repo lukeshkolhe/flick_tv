@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flick_tv/core/constants/app_assets.dart';
+import 'package:flick_tv/core/constants/app_strings.dart';
 import 'package:flick_tv/core/theme/app_colors.dart';
 import 'package:flick_tv/core/widgets/app_svg_asset.dart';
 import 'package:flick_tv/features/home/presentation/widgets/home_sub_screen_scaffold.dart';
@@ -12,7 +13,7 @@ class AddMoneyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HomeSubScreenScaffold(
-      title: 'Add Money',
+      title: AppStrings.addFlickCredits,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -23,11 +24,11 @@ class AddMoneyScreen extends StatelessWidget {
                 assetPath: AppAssets.wallet,
                 width: 96,
                 height: 76,
-                semanticLabel: 'Wallet',
+                semanticLabel: AppStrings.flickCreditsWallet,
               ),
               const SizedBox(height: 24),
               const Text(
-                'Add money flow',
+                AppStrings.addFlickCreditsHeading,
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 18,
@@ -36,7 +37,7 @@ class AddMoneyScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Connect payment method and top-up UI here.',
+                AppStrings.addFlickCreditsBody,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.textSecondary.withValues(alpha: 0.9),

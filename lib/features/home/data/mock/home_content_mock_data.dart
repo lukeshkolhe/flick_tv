@@ -1,35 +1,32 @@
 import 'package:flick_tv/core/constants/app_assets.dart';
+import 'package:flick_tv/core/constants/app_strings.dart';
 
 /// Shared mock payloads — used by local cache and mock remote API.
 abstract final class HomeContentMockData {
   static Map<String, dynamic> get homeJson => {
-        'brand_name': 'Flick TV',
-        'feature_title': 'MONEY',
-        'footer_watermark': 'Enjoy Seamless one tap payments',
-        'add_money_label': 'Add Money',
-        'gift_card_title': 'Claim Gift Card',
-        'gift_card_subtitle':
-            'Enter gift card details to claim your gift card',
+        'brand_name': AppStrings.brandName,
+        'feature_title': AppStrings.featureTitle,
+        'footer_watermark': AppStrings.footerWatermark,
+        'add_money_label': AppStrings.addFlickCredits,
+        'gift_card_title': AppStrings.redeemGiftCredits,
+        'gift_card_subtitle': AppStrings.giftCreditsSubtitle,
         'features': [
           {
-            'id': 'single_tap',
-            'title': 'Single tap payments',
-            'subtitle':
-                'Enjoy seamless payments without the wait for OTPs',
+            'id': 'one_tap_episodes',
+            'title': AppStrings.oneTapEpisodesTitle,
+            'subtitle': AppStrings.oneTapEpisodesSubtitle,
             'icon_asset': AppAssets.featureSingleTap,
           },
           {
-            'id': 'zero_failures',
-            'title': 'Zero failures',
-            'subtitle':
-                'Zero payment failures ensure you never miss an order',
+            'id': 'zero_buffering',
+            'title': AppStrings.zeroBufferingTitle,
+            'subtitle': AppStrings.zeroBufferingSubtitle,
             'icon_asset': AppAssets.featureInstant,
           },
           {
-            'id': 'realtime_refunds',
-            'title': 'Real-time refunds',
-            'subtitle':
-                'No need to wait for refunds. Flick TV Money refunds are instant!',
+            'id': 'instant_unlocks',
+            'title': AppStrings.instantUnlocksTitle,
+            'subtitle': AppStrings.instantUnlocksSubtitle,
             'icon_asset': AppAssets.featureRewards,
           },
         ],

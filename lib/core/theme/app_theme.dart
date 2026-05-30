@@ -8,7 +8,8 @@ abstract final class AppTheme {
         scaffoldBackgroundColor: AppColors.background,
         colorScheme: const ColorScheme.dark(
           surface: AppColors.background,
-          primary: AppColors.primaryCta,
+          primary: AppColors.brandRed,
+          onPrimary: AppColors.textPrimary,
           onSurface: AppColors.textPrimary,
         ),
         appBarTheme: const AppBarTheme(

@@ -3,7 +3,7 @@ import 'package:flick_tv/core/theme/app_colors.dart';
 import 'package:flick_tv/core/widgets/app_svg_asset.dart';
 import 'package:flick_tv/features/home/domain/entities/feature_highlight.dart';
 
-/// Benefit option tile — matches blinkit MONEY feature row spec.
+/// Benefit option tile for the Flick TV micro drama home screen.
 class FeatureCard extends StatelessWidget {
   const FeatureCard({required this.highlight, super.key});
 

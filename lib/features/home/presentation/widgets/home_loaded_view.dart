@@ -31,8 +31,8 @@ class _HomeLoadedViewState extends State<HomeLoadedView>
     with SingleTickerProviderStateMixin {
   static const _duration = Duration(milliseconds: 5500);
 
-  /// Approximate height of wallet + brand + MONEY block for centering math.
-  static const _heroBlockHeight = 220.0;
+  /// Approximate height of wallet + brand + MicroDrama block for centering math.
+  static const _heroBlockHeight = 236.0;
 
   late final AnimationController _controller;
 

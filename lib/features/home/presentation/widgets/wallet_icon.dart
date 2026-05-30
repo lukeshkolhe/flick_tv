@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flick_tv/core/constants/app_assets.dart';
+import 'package:flick_tv/core/constants/app_strings.dart';
 import 'package:flick_tv/core/widgets/app_svg_asset.dart';
 
 class WalletIcon extends StatelessWidget {
@@ -15,7 +16,7 @@ class WalletIcon extends StatelessWidget {
         assetPath: AppAssets.wallet,
         width: size,
         height: size * 0.8,
-        semanticLabel: 'Wallet',
+        semanticLabel: AppStrings.wallet,
       ),
     );
   }

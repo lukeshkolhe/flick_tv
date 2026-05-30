@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flick_tv/core/constants/app_strings.dart';
 import 'package:flick_tv/core/widgets/circle_icon_button.dart';
 
 class HomeTopBar extends StatelessWidget {
@@ -22,14 +23,14 @@ class HomeTopBar extends StatelessWidget {
         children: [
           CircleIconButton(
             icon: Icons.arrow_back_ios_new,
-            semanticLabel: 'Go back',
+            semanticLabel: AppStrings.goBack,
             onPressed: onBack,
           ),
           Opacity(
             opacity: settingsOpacity.clamp(0, 1),
             child: CircleIconButton(
               icon: Icons.settings_outlined,
-              semanticLabel: 'Settings',
+              semanticLabel: AppStrings.settings,
               onPressed: onSettings,
             ),
           ),

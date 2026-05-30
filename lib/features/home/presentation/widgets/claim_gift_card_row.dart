@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flick_tv/core/constants/app_assets.dart';
+import 'package:flick_tv/core/constants/app_strings.dart';
 import 'package:flick_tv/core/theme/app_colors.dart';
 import 'package:flick_tv/core/widgets/app_svg_asset.dart';
 
-/// Compact navigation row for gift card claim — distinct from [FeatureCard] tiles.
+/// Compact navigation row for gift credit redemption — distinct from [FeatureCard] tiles.
 class ClaimGiftCardRow extends StatelessWidget {
   const ClaimGiftCardRow({
     required this.title,
@@ -41,7 +42,7 @@ class ClaimGiftCardRow extends StatelessWidget {
                   child: const AppSvgAsset(
                     assetPath: AppAssets.giftCardThumb,
                     fit: BoxFit.cover,
-                    semanticLabel: 'Gift card',
+                    semanticLabel: AppStrings.giftCredits,
                   ),
                 ),
               ),

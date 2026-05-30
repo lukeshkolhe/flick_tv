@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flick_tv/core/constants/app_strings.dart';
 import 'package:flick_tv/core/theme/app_colors.dart';
 import 'package:flick_tv/core/widgets/circle_icon_button.dart';
 
@@ -27,7 +28,7 @@ class HomeSubScreenScaffold extends StatelessWidget {
                 children: [
                   CircleIconButton(
                     icon: Icons.arrow_back_ios_new,
-                    semanticLabel: 'Go back',
+                    semanticLabel: AppStrings.goBack,
                     onPressed: () => Navigator.maybePop(context),
                   ),
                   const SizedBox(width: 12),

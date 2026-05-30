@@ -1,4 +1,4 @@
-import 'package:flick_tv/core/constants/app_constants.dart';
+import 'package:flick_tv/core/constants/api_constants.dart';
 import 'package:flick_tv/core/network/api_client.dart';
 import 'package:flick_tv/features/home/data/models/home_content_model.dart';
 
@@ -18,17 +18,17 @@ final class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   @override
   Future<HomeContentModel> getHomeContent() async {
-    final json = await _apiClient.get(AppConstants.homeContentPath);
+    final json = await _apiClient.get(ApiConstants.homePath);
     return HomeContentModel.fromJson(json);
   }
 
   @override
   Future<void> submitAddMoney() async {
-    await _apiClient.post('${AppConstants.apiBasePath}/money/add');
+    await _apiClient.post(ApiConstants.addMoneyPath);
   }
 
   @override
   Future<void> submitGiftCardClaim() async {
-    await _apiClient.post('${AppConstants.apiBasePath}/gift-card/claim');
+    await _apiClient.post(ApiConstants.giftCardClaimPath);
   }
 }

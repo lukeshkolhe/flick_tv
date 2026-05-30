@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flick_tv/core/constants/app_strings.dart';
 import 'package:flick_tv/core/di/injection.dart';
 import 'package:flick_tv/core/theme/app_colors.dart';
 import 'package:flick_tv/core/widgets/app_loading_indicator.dart';
@@ -70,7 +71,7 @@ class _HomeErrorBody extends StatelessWidget {
                 onPressed: () {
                   context.read<HomeBloc>().add(const HomeRetryPressed());
                 },
-                child: const Text('Retry'),
+                child: const Text(AppStrings.retry),
               ),
             ],
           ),

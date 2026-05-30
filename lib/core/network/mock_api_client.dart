@@ -1,4 +1,4 @@
-import 'package:flick_tv/core/constants/app_constants.dart';
+import 'package:flick_tv/core/constants/api_constants.dart';
 import 'package:flick_tv/core/error/exceptions.dart';
 import 'package:flick_tv/core/network/api_client.dart';
 import 'package:flick_tv/features/home/data/mock/home_content_mock_data.dart';
@@ -8,7 +8,7 @@ import 'package:flick_tv/features/home/data/mock/home_content_mock_data.dart';
 /// Swap the [ApiClient] binding to [HttpApiClient] when a backend exists.
 final class MockApiClient implements ApiClient {
   MockApiClient({
-    this.networkDelay = AppConstants.mockNetworkDelay,
+    this.networkDelay = ApiConstants.mockNetworkDelay,
     this.forceServerError = false,
   });
 
@@ -16,7 +16,7 @@ final class MockApiClient implements ApiClient {
   final bool forceServerError;
 
   static final Map<String, Map<String, dynamic>> _routes = {
-    AppConstants.homeContentPath: HomeContentMockData.homeJson,
+    ApiConstants.homePath: HomeContentMockData.homeJson,
   };
 
   @override
@@ -47,8 +47,8 @@ final class MockApiClient implements ApiClient {
     }
 
     return switch (path) {
-      '${AppConstants.apiBasePath}/money/add' => {'success': true},
-      '${AppConstants.apiBasePath}/gift-card/claim' => {'success': true},
+      ApiConstants.addMoneyPath => {'success': true},
+      ApiConstants.giftCardClaimPath => {'success': true},
       _ => throw ServerException('Mock API: no route for $path'),
     };
   }

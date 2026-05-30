@@ -47,7 +47,7 @@ class _TopGlowDotPainter extends CustomPainter {
     for (var y = 0.0; y < maxY; y += spacing) {
       final fade = 1 - (y / maxY);
       final dotPaint = Paint()
-        ..color = AppColors.walletGold.withValues(alpha: 0.35 * fade);
+        ..color = AppColors.brandRedLight.withValues(alpha: 0.28 * fade);
       for (var x = 0.0; x < size.width; x += spacing) {
         canvas.drawCircle(Offset(x, y), dotRadius, dotPaint);
       }
